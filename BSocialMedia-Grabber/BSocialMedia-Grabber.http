@@ -1,0 +1,6 @@
+@BSocialMedia_Grabber_HostAddress = http://localhost:5286
+
+GET {{BSocialMedia_Grabber_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
