@@ -5,6 +5,8 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Prometheus;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,15 +20,14 @@ if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(key))
     throw new InvalidOperationException("Las variables de entorno SUPABASE_URL y SUPABASE_KEY deben estar configuradas.");
 }
 
+// Configurar CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        builder => builder
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    options.AddPolicy(MyAllowSpecificOrigins,
+        builder => builder.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
 });
-
 
 // Registrar el servicio de Supabase
 builder.Services.AddSingleton<SupabaseService>(provider =>
@@ -39,7 +40,7 @@ builder.Services.AddSingleton<SupabaseService>(provider =>
 builder.Services.AddHttpClient<ScraperService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(60);
-}); 
+});
 
 builder.Services.AddScoped<ScraperService>();
 
@@ -70,6 +71,7 @@ app.UseHttpMetrics();
 app.MapMetrics();
 
 app.UseHttpsRedirection();
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
